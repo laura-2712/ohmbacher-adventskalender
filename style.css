@@ -1,0 +1,388 @@
+/* ========================================
+   GRUNDEINSTELLUNGEN
+   ======================================== */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Georgia, "Times New Roman", serif;
+    background-color: #f5f1e8;
+    color: #174f47;
+}
+
+
+/* ========================================
+   HAUPTBEREICH
+   ======================================== */
+
+main {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 50px 30px 70px;
+}
+
+
+/* ========================================
+   ÜBERSCHRIFT
+   ======================================== */
+
+.header {
+    text-align: center;
+    margin-bottom: 45px;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 48px;
+    font-weight: normal;
+    letter-spacing: 1px;
+    color: #174f47;
+}
+
+.header p {
+    margin: 12px 0 0;
+    font-family: Arial, sans-serif;
+    font-size: 20px;
+    color: #b52a2a;
+}
+
+
+/* ========================================
+   ADVENTSKALENDER
+   ======================================== */
+
+.kalender {
+    display: grid;
+
+    /* 4 Spalten */
+    grid-template-columns: repeat(4, 1fr);
+
+    /* Abstand zwischen den Türchen */
+    gap: 25px;
+
+    width: 100%;
+}
+
+
+/* ========================================
+   TÜ RCHEN
+   ======================================== */
+
+.tuerchen {
+    position: relative;
+
+    aspect-ratio: 1 / 1;
+
+    border: none;
+    padding: 0;
+
+    cursor: pointer;
+
+    background-color: transparent;
+
+    perspective: 1000px;
+
+    overflow: visible;
+}
+
+
+/* Die eigentliche Tür */
+
+.tuer-inhalt {
+    position: absolute;
+
+    inset: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: #e8dfd0;
+
+    transform-origin: left center;
+
+    transition:
+        transform 0.7s cubic-bezier(0.65, 0, 0.35, 1),
+        box-shadow 0.7s ease;
+
+    z-index: 2;
+}
+
+
+/* Abwechselnde Farben */
+
+.tuerchen:nth-child(4n + 2) .tuer-inhalt,
+.tuerchen:nth-child(4n + 3) .tuer-inhalt {
+    background-color: #174f47;
+}
+
+
+/* Rote Türchen */
+
+.tuerchen:nth-child(6n + 3) .tuer-inhalt,
+.tuerchen:nth-child(6n + 4) .tuer-inhalt {
+    background-color: #b52a2a;
+}
+
+
+/* ========================================
+   TÜ R ÖFFNEN
+   ======================================== */
+
+.tuerchen.geoeffnet .tuer-inhalt {
+    transform: rotateY(-105deg);
+
+    box-shadow:
+        8px 5px 15px rgba(0, 0, 0, 0.25);
+}
+
+/* Abwechselnde Farben */
+
+.tuerchen:nth-child(4n + 2),
+.tuerchen:nth-child(4n + 3) {
+    background-color: #174f47;
+}
+
+
+/* Rote Türchen */
+
+.tuerchen:nth-child(6n + 3),
+.tuerchen:nth-child(6n + 4) {
+    background-color: #b52a2a;
+}
+
+
+/* ========================================
+   NUMMER
+   ======================================== */
+
+.tuer-inhalt .nummer {
+    position: absolute;
+
+    top: 10px;
+    left: 14px;
+
+    font-size: 38px;
+    line-height: 1;
+
+    color: #b52a2a;
+}
+
+
+/* Nummer auf dunklen Türchen */
+
+.tuerchen:nth-child(4n + 2) .nummer,
+.tuerchen:nth-child(4n + 3) .nummer {
+    color: #f5f1e8;
+}
+
+
+/* Nummer auf roten Türchen */
+
+.tuerchen:nth-child(6n + 3) .nummer,
+.tuerchen:nth-child(6n + 4) .nummer {
+    color: #f5f1e8;
+}
+
+
+/* ========================================
+   SYMBOL
+   ======================================== */
+
+.symbol {
+    font-family: Arial, sans-serif;
+    font-size: 75px;
+
+    transition: transform 0.2s ease;
+}
+
+
+/* ========================================
+   HOVER-EFFEKT
+   ======================================== */
+
+.tuerchen:hover .tuer-inhalt {
+    transform: translateY(-4px);
+}
+
+.tuerchen:hover .symbol {
+    transform: scale(1.08);
+}
+
+
+/* ========================================
+   POPUP-HINTERGRUND
+   ======================================== */
+
+.popup-overlay {
+    position: fixed;
+
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+
+    background-color: rgba(0, 0, 0, 0.55);
+
+    display: none;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    z-index: 1000;
+}
+
+
+/* ========================================
+   POPUP
+   ======================================== */
+
+.popup {
+    position: relative;
+
+    width: 100%;
+    max-width: 550px;
+
+    background-color: #f5f1e8;
+
+    padding: 50px 45px;
+
+    box-shadow:
+        0 15px 40px rgba(0, 0, 0, 0.25);
+
+    text-align: center;
+}
+
+
+/* ========================================
+   SCHLIESSEN-BUTTON
+   ======================================== */
+
+.popup-schliessen {
+    position: absolute;
+
+    top: 12px;
+    right: 15px;
+
+    border: none;
+    background: none;
+
+    font-size: 32px;
+    color: #174f47;
+
+    cursor: pointer;
+}
+
+
+/* ========================================
+   POPUP-TEXT
+   ======================================== */
+
+.popup h2 {
+    margin-top: 0;
+
+    color: #b52a2a;
+
+    font-size: 32px;
+}
+
+.popup p {
+    font-family: Arial, sans-serif;
+
+    font-size: 18px;
+    line-height: 1.6;
+
+    color: #333;
+}
+
+
+/* ========================================
+   TABLET
+   ======================================== */
+
+@media (max-width: 800px) {
+
+    main {
+        padding: 40px 20px 60px;
+    }
+
+    .header h1 {
+        font-size: 38px;
+    }
+
+    .header p {
+        font-size: 18px;
+    }
+
+    .kalender {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+    }
+
+    .nummer {
+        font-size: 30px;
+    }
+
+    .symbol {
+        font-size: 55px;
+    }
+}
+
+
+/* ========================================
+   SMARTPHONE
+   ======================================== */
+
+@media (max-width: 550px) {
+
+    main {
+        padding: 30px 15px 50px;
+    }
+
+    .header {
+        margin-bottom: 30px;
+    }
+
+    .header h1 {
+        font-size: 30px;
+        line-height: 1.2;
+    }
+
+    .header p {
+        font-size: 16px;
+    }
+
+    .kalender {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .nummer {
+        top: 7px;
+        left: 9px;
+        font-size: 25px;
+    }
+
+    .symbol {
+        font-size: 45px;
+    }
+
+    .popup {
+        padding: 45px 25px;
+    }
+
+    .popup h2 {
+        font-size: 26px;
+    }
+
+    .popup p {
+        font-size: 16px;
+    }
+}
