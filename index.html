@@ -1,221 +1,367 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Begehbarer Adventskalender Ombach</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Caveat:wght@600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --red:#d6403a; --darkred:#8c2528; --green:#2b6444; --mint:#7ab98f;
+  --cream:#f6f2dc; --sand:#e6dfc0; --ink:#3a2a22;
+  --display:"Abril Fatface","Playfair Display",Georgia,serif;
+  --script:"Caveat","Segoe Script",cursive;
+  --body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; min-height:100vh; font-family:var(--body); color:var(--ink);
+  background:
+    radial-gradient(circle at 20% 10%, rgba(255,255,255,.07) 0 2px, transparent 3px) 0 0/90px 90px,
+    #2b6444;
+  padding:clamp(10px,3vw,40px);
+}
+.sheet{
+  max-width:980px; margin:0 auto; background:var(--cream);
+  border-radius:32px; padding:clamp(18px,4vw,48px) clamp(12px,3vw,36px) 40px;
+  box-shadow:0 20px 50px rgba(0,0,0,.3);
+  background-image:radial-gradient(rgba(120,100,60,.07) 1px, transparent 1.5px);
+  background-size:7px 7px;
+  position:relative; overflow:hidden;
+}
+h1{
+  font-family:var(--display); font-weight:400; color:var(--red);
+  text-align:center; margin:0; line-height:1.05;
+  font-size:clamp(2rem,6.5vw,3.6rem); letter-spacing:.01em;
+}
+h1 small{display:block;font-family:var(--script);font-size:.5em;color:var(--green);margin-top:.2em}
 
-    <title>Ohmbacher Adventskalender</title>
+.logo{text-align:center;margin-bottom:14px}
+.logo img{max-height:clamp(80px,120vw,140px);max-width:70%;height:auto;width:auto}
+.logo:empty,.logo.none{display:none}
 
-    <link rel="stylesheet" href="style.css">
+@media (max-width:640px){
+  h1{font-size:clamp(1.9rem,10vw,2.8rem)}
+  h1 span{display:block}
+}
+
+/* Countdown */
+.countdown{text-align:center;margin:26px 0 34px}
+.countdown .label{font-family:var(--script);font-size:clamp(1.4rem,4vw,1.9rem);color:var(--green)}
+.timer{display:flex;justify-content:center;align-items:flex-start;gap:clamp(4px,1.6vw,14px);margin-top:4px}
+.unit{min-width:0;flex:0 1 auto;padding:0 2px}
+.unit b{display:block;font-family:var(--display);font-weight:400;color:var(--red);font-size:clamp(2.4rem,9vw,5rem);line-height:1;font-variant-numeric:tabular-nums}
+.unit span{font-family:var(--script);color:var(--green);font-size:clamp(1rem,3.2vw,1.6rem)}
+.sep{font-family:var(--display);color:var(--red);font-size:clamp(2.2rem,8vw,4.4rem);line-height:1}
+.next-info{margin-top:10px;font-weight:600;font-size:.95rem}
+.next-info:empty{display:none}
+
+/* Türchen */
+/* ===== LAYOUT DER TÜRCHEN – HIER ANPASSEN =====
+   --cols = Anzahl Spalten, --gap = Abstand. Die Zeilenhöhe wird automatisch so berechnet,
+   dass jedes Türchen quadratisch ist. Für Handys siehe @media ganz unten. */
+.gridwrap{container-type:inline-size;width:100%}
+.grid{
+  --cols:4; --gap:14px;
+  display:grid; grid-template-columns:repeat(var(--cols),minmax(0,1fr));
+  grid-auto-rows:calc((100cqw - (var(--cols) - 1) * var(--gap)) / var(--cols));
+  grid-auto-flow:dense; gap:var(--gap);
+}
+.door{
+  position:relative; width:100%; height:100%; min-width:0; border:0; padding:0; background:none;
+  perspective:900px; cursor:pointer; font:inherit; border-radius:16px;
+  -webkit-tap-highlight-color:transparent;
+}
+.door.wide{grid-column:span 2}
+.door.big{grid-column:span 2;grid-row:span 2}
+.door:focus-visible{outline:4px solid var(--red);outline-offset:3px}
+
+.inside,.front{position:absolute;inset:0;border-radius:16px;overflow:hidden}
+.inside{
+  background:#fff8e1; display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:4px; padding:8px; text-align:center;
+  box-shadow:inset 0 4px 14px rgba(80,50,20,.35);
+}
+.inside .t{font-weight:700;font-size:clamp(.72rem,2.2vw,1rem);line-height:1.2;color:var(--darkred)}
+.inside .time{font-family:var(--script);font-size:clamp(1.1rem,3vw,1.4rem);color:var(--green)}
+
+.front{
+  display:flex;align-items:center;justify-content:center;
+  transform-origin:left center; transition:transform .8s cubic-bezier(.3,.7,.2,1), box-shadow .8s;
+  backface-visibility:hidden; box-shadow:0 3px 8px rgba(0,0,0,.18);
+}
+.front .num{font-family:var(--display);font-size:clamp(2rem,7vw,3.8rem);color:var(--red);line-height:1}
+.door.open .front{transform:rotateY(-118deg);box-shadow:none}
+@media (hover:hover){.door:not(.open):not(.past):hover .front{transform:rotateY(-14deg)}}
+
+/* Muster */
+.p0 .front{background:repeating-linear-gradient(135deg,rgba(255,255,255,.14) 0 14px,transparent 14px 28px),var(--mint)}
+.p1 .front{background:radial-gradient(rgba(255,255,255,.18) 2px,transparent 3px) 0 0/22px 22px,var(--green)}
+.p2 .front{background:radial-gradient(rgba(255,255,255,.14) 5px,transparent 6px) 0 0/26px 26px,var(--darkred)}
+.p3 .front{background:radial-gradient(rgba(255,255,255,.7) 2px,transparent 3px) 0 0/24px 24px,var(--sand)}
+.p4 .front{background:repeating-linear-gradient(45deg,rgba(255,255,255,.12) 0 14px,transparent 14px 28px),var(--darkred)}
+.p1 .num,.p2 .num,.p4 .num{color:#ffb9a8}
+.p0 .num{color:var(--darkred)}
+
+/* Status */
+.door.past .front{filter:grayscale(.9) brightness(1.08) contrast(.85);opacity:.7}
+.door.past .inside{filter:grayscale(.8);opacity:.85}
+.door.today .front{animation:glow 2.2s ease-in-out infinite}
+.door.today:not(.open)::after{
+  content:"Heute";position:absolute;top:-6px;right:-2px;z-index:2;
+  background:var(--red);color:#fff;font-weight:700;font-size:.72rem;padding:3px 9px;border-radius:99px;
+  box-shadow:0 2px 6px rgba(0,0,0,.25);
+}
+@keyframes glow{50%{box-shadow:0 0 0 5px rgba(214,64,58,.35),0 3px 12px rgba(0,0,0,.25)}}
+.door.shake{animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+
+/* Pop-up */
+dialog{
+  border:0;padding:0;border-radius:24px;max-width:min(92vw,460px);width:100%;
+  background:var(--cream);color:var(--ink);overflow:visible;
+  box-shadow:0 24px 60px rgba(0,0,0,.45);
+}
+dialog::backdrop{background:rgba(20,45,30,.72);backdrop-filter:blur(3px)}
+dialog[open]{animation:pop .35s cubic-bezier(.3,1.4,.5,1)}
+@keyframes pop{from{transform:scale(.85) translateY(20px);opacity:0}}
+.m-head{
+  background:repeating-linear-gradient(135deg,rgba(255,255,255,.08) 0 14px,transparent 14px 28px),var(--darkred);
+  color:#fff;border-radius:24px 24px 0 0;padding:22px 24px 18px;text-align:center;
+}
+.m-head .big{font-family:var(--display);font-size:3.4rem;line-height:1;color:#ffd9cf}
+.m-body{padding:20px 24px 26px;max-height:calc(88dvh - 110px);overflow-y:auto;-webkit-overflow-scrolling:touch}
+.row{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}
+.row .ic{font-size:1.4rem;width:2rem;text-align:center;flex:none}
+.row strong{display:block;font-size:.85rem;color:var(--green)}
+.m-text{margin:6px 0 0;padding-top:14px;border-top:2px dotted var(--sand);font-size:1.05rem;line-height:1.5}
+.m-note{margin-top:12px;font-size:.85rem;font-style:italic;color:#7a6a5c}
+.close{
+  margin:18px auto 0;display:block;background:var(--red);color:#fff;border:0;border-radius:99px;
+  padding:12px 32px;min-height:44px;font:700 1rem var(--body);cursor:pointer;
+}
+.close:hover{background:var(--darkred)}
+.close:focus-visible{outline:3px solid var(--green);outline-offset:2px}
+.x{position:absolute;top:10px;right:12px;background:rgba(255,255,255,.2);color:#fff;border:0;width:40px;height:40px;border-radius:50%;font-size:1.2rem;cursor:pointer}
+
+footer{text-align:center;margin-top:34px;font-size:.9rem;color:#6b5c4e}
+
+/* Schnee */
+.snow{position:fixed;inset:0;pointer-events:none;z-index:5;overflow:hidden}
+.snow i{position:absolute;top:-20px;color:#fff;opacity:.8;animation:fall linear infinite;font-style:normal}
+@keyframes fall{to{transform:translate3d(var(--dx),110vh,0) rotate(360deg)}}
+
+/* ===== HANDY-ANSICHT (bis 640px Breite) – HIER ANPASSEN ===== */
+@media (max-width:640px){
+  .grid{--cols:3; --gap:8px}
+  .sheet{border-radius:22px;padding:18px 10px 28px}
+  body{padding:8px}
+  .timer{gap:2px}
+  .m-head{padding:18px 16px 14px}
+  .m-head .big{font-size:2.6rem}
+  dialog{max-width:94vw}
+  .front .num{font-size:clamp(1.6rem,9vw,2.6rem)}
+  .inside{padding:4px}
+  .inside .t{font-size:.68rem}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .snow{display:none}
+}
+</style>
 </head>
-
 <body>
+<div class="snow" id="snow" aria-hidden="true"></div>
 
-    <main>
+<main class="sheet">
+  <div class="logo" id="logo"><img id="logo-img" alt="Logo des Veranstalters" hidden></div>
+  <h1><span>Begehbarer</span> <span>Adventskalender</span> <span>Ombach</span></h1>
 
-        <!-- Überschrift -->
-        <header class="header">
-            <h1>Ohmbacher Adventskalender</h1>
-            <p>Gemeinsam durch die Weihnachtszeit</p>
-        </header>
-
-
-        <!-- Adventskalender -->
-  <section class="kalender">
-
-    <button class="tuerchen" data-tuer="1">
-        <span class="tuer-inhalt">
-            <span class="nummer">1</span>
-            <span class="symbol">🎄</span>
-        </span>
-    </button>
-
-    <button class="tuerchen" data-tuer="2">
-        <span class="tuer-inhalt">
-            <span class="nummer">2</span>
-            <span class="symbol">⭐</span>
-        </span>
-    </button>
-
-    <button class="tuerchen" data-tuer="3">
-        <span class="tuer-inhalt">
-            <span class="nummer">3</span>
-            <span class="symbol">☃️</span>
-        </span>
-    </button>
-
-    <button class="tuerchen" data-tuer="4">
-        <span class="tuer-inhalt">
-            <span class="nummer">4</span>
-            <span class="symbol">🎁</span>
-        </span>
-    </button>
-
-    <button class="tuerchen" data-tuer="5">
-        <span class="tuer-inhalt">
-            <span class="nummer">5</span>
-            <span class="symbol">🎄</span>
-        </span>
-    </button>
-
-    <button class="tuerchen" data-tuer="6">
-        <span class="tuer-inhalt">
-            <span class="nummer">6</span>
-            <span class="symbol">🔔</span>
-        </span>
-    </button>
-
-    <button class="tuerchen" data-tuer="7">
-        <span class="tuer-inhalt">
-            <span class="nummer">7</span>
-            <span class="symbol">🦌</span>
-        </span>
-    </button>
-
-    <button class="tuerchen" data-tuer="8">
-        <span class="tuer-inhalt">
-            <span class="nummer">8</span>
-            <span class="symbol">❄️</span>
-        </span>
-    </button>
-
-    <button class="tuerchen" data-tuer="9">
-        <span class="tuer-inhalt">
-            <span class="nummer">9</span>
-            <span class="symbol">🧣</span>
-        </span>
-    </button>
-
-    <button class="tuerchen" data-tuer="10">
-        <span class="tuer-inhalt">
-            <span class="nummer">10</span>
-            <span class="symbol">⛸️</span>
-        </span>
-    </button>
-
-    <button class="tuerchen" data-tuer="11">
-        <span class="tuer-inhalt">
-            <span class="nummer">11</span>
-            <span class="symbol">🧤</span>
-        </span>
-    </button>
-
-    <button class="tuerchen" data-tuer="12">
-        <span class="tuer-inhalt">
-            <span class="nummer">12</span>
-            <span class="symbol">🍪</span>
-        </span>
-    </button>
-
-    <button class="tuerchen" data-tuer="13">
-        <span class="tuer-inhalt">
-            <span class="nummer">13</span>
-            <span class="symbol">☕</span>
-        </span>
-    </button>
-
-    <button class="tuerchen" data-tuer="14">
-        <span class="tuer-inhalt">
-            <span class="nummer">14</span>
-            <span class="symbol">🕯️</span>
-        </span>
-    </button>
-
-    <button class="tuerchen" data-tuer="15">
-        <span class="tuer-inhalt">
-            <span class="nummer">15</span>
-            <span class="symbol">🎄</span>
-        </span>
-    </button>
-
-    <button class="tuerchen" data-tuer="16">
-        <span class="tuer-inhalt">
-            <span class="nummer">16</span>
-            <span class="symbol">🦊</span>
-        </span>
-    </button>
-
-    <button class="tuerchen" data-tuer="17">
-        <span class="tuer-inhalt">
-            <span class="nummer">17</span>
-            <span class="symbol">🎁</span>
-        </span>
-    </button>
-
-    <button class="tuerchen" data-tuer="18">
-        <span class="tuer-inhalt">
-            <span class="nummer">18</span>
-            <span class="symbol">🎤</span>
-        </span>
-    </button>
-
-    <button class="tuerchen" data-tuer="19">
-        <span class="tuer-inhalt">
-            <span class="nummer">19</span>
-            <span class="symbol">☕</span>
-        </span>
-    </button>
-
-    <button class="tuerchen" data-tuer="20">
-        <span class="tuer-inhalt">
-            <span class="nummer">20</span>
-            <span class="symbol">🎠</span>
-        </span>
-    </button>
-
-    <button class="tuerchen" data-tuer="21">
-        <span class="tuer-inhalt">
-            <span class="nummer">21</span>
-            <span class="symbol">❄️</span>
-        </span>
-    </button>
-
-    <button class="tuerchen" data-tuer="22">
-        <span class="tuer-inhalt">
-            <span class="nummer">22</span>
-            <span class="symbol">🎀</span>
-        </span>
-    </button>
-
-    <button class="tuerchen" data-tuer="23">
-        <span class="tuer-inhalt">
-            <span class="nummer">23</span>
-            <span class="symbol">🎅</span>
-        </span>
-    </button>
-
-    <button class="tuerchen" data-tuer="24">
-        <span class="tuer-inhalt">
-            <span class="nummer">24</span>
-            <span class="symbol">🎂</span>
-        </span>
-    </button>
-
-</section>
-
-    </main>
-
-
-    <!-- Popup -->
-    <div class="popup-overlay" id="popup">
-
-        <div class="popup">
-
-            <button class="popup-schliessen" id="popupSchliessen">
-                &times;
-            </button>
-
-            <div id="popupInhalt">
-                <!-- Der Inhalt wird später mit JavaScript eingefügt -->
-            </div>
-
-        </div>
-
+  <section class="countdown" aria-live="off">
+    <div class="label">Nächstes Türchen:</div>
+    <div class="timer" id="timer">
+      <div class="unit"><b id="cd-d">0</b><span>Tage</span></div><div class="sep">:</div>
+      <div class="unit"><b id="cd-h">00</b><span>Stunden</span></div><div class="sep">:</div>
+      <div class="unit"><b id="cd-m">00</b><span>Minuten</span></div><div class="sep">:</div>
+      <div class="unit"><b id="cd-s">00</b><span>Sekunden</span></div>
     </div>
+    <div class="next-info" id="next-info"></div>
+  </section>
 
+  <div class="gridwrap"><section class="grid" id="grid" aria-label="Türchen"></section></div>
 
-    <!-- JavaScript -->
-    <script src="script.js"></script>
+  <footer>Wir freuen uns auf eine schöne Weihnachtszeit! 🎄</footer>
+</main>
 
+<dialog id="modal" aria-labelledby="m-title">
+  <div class="m-head">
+    <button class="x" id="x" aria-label="Schließen">✕</button>
+    <div class="big" id="m-num"></div>
+  </div>
+  <div class="m-body" id="m-body"></div>
+</dialog>
+
+<script>
+/* ===== EINSTELLUNGEN ===== */
+const YEAR = 2026;
+const LOGO_SRC = "logo.png"; // Pfad zum Logo des Veranstalters ("" = kein Logo)
+const DEFAULT_TIME = "18:00"; // Wird genutzt, wenn bei einem Türchen keine Uhrzeit steht
+
+/* ===== DIE TÜRCHEN ===== */
+const EVENTS = {
+  1:  {time:"18:00", where:"Heimat- und Kulturtreff", title:"Gemeinsam für Ohmbach e.V.", what:"Gemeinsam für Ohmbach e.V.: Gemeinsames Singen mit Glühwein, Kinderpunsch und Plätzchen"},
+  3:  {time:"17:00", where:"Heimat- und Kulturtreff", title:"Verzehlches Café", what:"Verzehlches Café: Spiele spielen mit Jung & Alt (nach dem regulären Verzehlches)"},
+  4:  {time:"17:00", where:"KiTa", title:"KiTa und Förderverein", what:"KiTa und Förderverein: Kindersingen mit Glühwein & Crêpes"},
+  5:  {time:"18:00", where:"Sportheim", title:"Glühweinparty", what:"Glühweinparty der Straußjugend"},
+  6:  {time:"14:00", where:"Ringstraße 20", title:"Nikolaus & Markt", what:"Schachclub: Weihnachtsmarkt mit Glühwein und Gulaschsuppe mit Nikolausbesuch"},
+  7:  {time:"17:00", where:"Höferstraße 22", title:"Essen & Getränke", what:"Familie Zens: Essen und Getränke"},
+  9:  {time:"18:00", where:"Kirchenstraße 20", title:"Glühwein & Punsch", what:"„Hiwwelfenster“: Glühwein, Glühgin, Kinderpunsch und leckeres aus Mehl"},
+  11: {time:"18:00", where:"Sportheim", title:"TvO", what:"TvO: Weihnachtslieder mit dem Musikzug"},
+  12: {time:"18:00", where:"Am Hühnerberg 6", title:"Sven und Joyce Sommer", what:"Sven und Joyce Sommer: Mini-Garagen-Konzert (Getränke bitte selbst mitbringen)"},
+  13: {time:"16:00", where:"Evangelische Kirche", title:"Lichterwanderung", what:"Singen und Lichterwanderung mit biblischem Impuls"},
+  15: {time:"18:00", where:"Feuerwehrhaus", title:"Feuerwehr", what:"Feuerwehr: Kinderpunsch, Glühwein und Laugengebäck"},
+  16: {time:"17:00", where:"Hauptstraße 2", title:"Familie Schießer", what:"Familie Schießer: Naschereien, Glühwein, Kinderpunsch sowie Outdoor-Spiele bei gutem Wetter"},
+  17: {time:"18:00", where:"Hauptstraße 21", title:"Familie Theobald", what:"Familie Theobald: Karaoke in der Scheune"},
+  18: {time:"17:30", where:"Hauptstraße 77", title:"Familien Luba und Burger", what:"Familie Luba und Burger; Glühwein, Kleinigkeit zu Essen"},
+  21: {time:"17:00", where:"Höferstraße 21", title:"Familie Preuss", what:"Familie Preuss: Glühwein, Kinderpnsch und Essen"}
+};
+
+/* Größere Türchen für das Bento-Layout (optional anpassen) */
+const SIZE = {1:"big", 3:"wide", 9:"wide", 11:"wide", 15:"wide", 16:"wide", 21:"wide"};
+
+/* ===== LOGIK ===== */
+// Zum Testen: ...adventskalender.html?datum=2026-12-10T12:00
+const test = new URLSearchParams(location.search).get("datum");
+const offset = test ? new Date(test) - new Date() : 0;
+const now = () => new Date(Date.now() + offset);
+
+const eventStart = d => {
+  const t = (EVENTS[d] && EVENTS[d].time) || DEFAULT_TIME;
+  const [h,m] = t.split(":").map(Number);
+  return new Date(YEAR, 11, d, h, m);
+};
+const dayStart = d => new Date(YEAR, 11, d);
+const isPast = d => now() >= new Date(YEAR, 11, d + 1);
+const isToday = d => now() >= dayStart(d) && !isPast(d);
+const pad = n => String(n).padStart(2,"0");
+const dateLong = d => dayStart(d).toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+const grid = document.getElementById("grid");
+const modal = document.getElementById("modal");
+let lastFocus = null;
+
+function buildGrid(){
+  grid.innerHTML = "";
+  for(const d of Object.keys(EVENTS).map(Number).sort((a,b)=>a-b)){
+    const ev = EVENTS[d];
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = `door p${(d*3)%5} ${SIZE[d]||""}`;
+    b.dataset.day = d;
+    b.setAttribute("aria-label", ev ? `Türchen ${d}: ${ev.title}` : `Türchen ${d}`);
+    b.innerHTML = `
+      <div class="inside">
+        <div class="t">${esc(ev.title)}</div><div class="time">${ev.time ? ev.time.replace(":00","")+" Uhr" : "Zeit folgt"}</div>
+      </div>
+      <div class="front"><span class="num">${d}</span></div>`;
+    b.addEventListener("click", () => openDoor(b, d));
+    grid.appendChild(b);
+  }
+  refreshStates();
+}
+
+function refreshStates(){
+  grid.querySelectorAll(".door").forEach(b=>{
+    const d = +b.dataset.day;
+    b.classList.toggle("past", isPast(d));
+    b.classList.toggle("today", isToday(d));
+  });
+}
+
+function openDoor(b, d){
+  lastFocus = b;
+  b.classList.add("open");
+  setTimeout(()=>showModal(d), 550);
+}
+
+function showModal(d){
+  const ev = EVENTS[d];
+  document.getElementById("m-num").textContent = d + ". Dezember";
+  const body = document.getElementById("m-body");
+  if(ev){
+    const time = ev.timeNote || (ev.time ? ev.time + " Uhr" : "Uhrzeit wird noch bekanntgegeben");
+    const where = ev.where || "Ort wird noch bekanntgegeben";
+    body.innerHTML = `
+      <div class="row"><span class="ic">🕒</span><div><strong>Uhrzeit</strong>${esc(time)}</div></div>
+      <div class="row"><span class="ic">📍</span><div><strong>Treffpunkt</strong>${esc(where)}</div></div>
+      <p class="m-text" id="m-title">${esc(ev.what)}</p>
+      ${ev.note ? `<div class="m-note">${esc(ev.note)}</div>` : ""}
+      ${isPast(d) ? `<div class="m-note">Dieses Türchen ist schon vorbei – danke an alle, die dabei waren! 💛</div>` : ""}
+      <button class="close" id="close">Schließen</button>`;
+  }
+  document.getElementById("close").onclick = () => modal.close();
+  modal.showModal();
+}
+
+document.getElementById("x").onclick = () => modal.close();
+modal.addEventListener("click", e => { if(e.target === modal) modal.close(); });
+modal.addEventListener("close", () => {
+  if(lastFocus){ lastFocus.classList.remove("open"); lastFocus.focus({preventScroll:true}); }
+});
+
+/* Countdown */
+function tick(){
+  const n = now();
+  const upcoming = Object.keys(EVENTS).map(Number).filter(d => eventStart(d) > n).sort((a,b)=>a-b)[0];
+  const info = document.getElementById("next-info");
+  const timer = document.getElementById("timer");
+  if(upcoming === undefined){
+    timer.style.display = "none";
+    document.querySelector(".countdown .label").textContent = "Alle Türchen sind geöffnet – frohe Weihnachten! 🎄";
+    info.textContent = "";
+  } else {
+    let diff = Math.floor((eventStart(upcoming) - n)/1000);
+    const days = Math.floor(diff/86400); diff %= 86400;
+    const h = Math.floor(diff/3600); diff %= 3600;
+    const m = Math.floor(diff/60), s = diff % 60;
+    cd("cd-d", days); cd("cd-h", pad(h)); cd("cd-m", pad(m)); cd("cd-s", pad(s));
+    const ev = EVENTS[upcoming];
+    info.textContent = `Türchen ${upcoming}${ev.where ? " · " + ev.where : ""}`;
+  }
+  refreshStates();
+}
+function cd(id, v){ const el = document.getElementById(id); if(el.textContent !== String(v)) el.textContent = v; }
+
+/* Schneeflocken */
+(function snow(){
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const box = document.getElementById("snow");
+  for(let i=0;i<26;i++){
+    const f = document.createElement("i");
+    f.textContent = i % 3 ? "❄" : "❅";
+    f.style.left = Math.random()*100 + "vw";
+    f.style.fontSize = (10 + Math.random()*14) + "px";
+    f.style.animationDuration = (9 + Math.random()*10) + "s";
+    f.style.animationDelay = (-Math.random()*15) + "s";
+    f.style.setProperty("--dx", (Math.random()*80-40) + "px");
+    box.appendChild(f);
+  }
+})();
+
+const logoImg = document.getElementById("logo-img");
+if(LOGO_SRC){
+  logoImg.onload = () => logoImg.hidden = false;
+  logoImg.onerror = () => document.getElementById("logo").classList.add("none");
+  logoImg.src = LOGO_SRC;
+} else document.getElementById("logo").classList.add("none");
+
+buildGrid();
+tick();
+setInterval(tick, 1000);
+</script>
 </body>
 </html>
